@@ -134,3 +134,6 @@ venv.bak/
 pip-selfcheck.json
 
 # End of https://www.gitignore.io/api/venv,python,jupyternotebooks
+
+# Do not want to accidentally commit my access
+access.json

@@ -1,11 +1,11 @@
 import os
+import json
 import requests
 
 def get_token(username, password):
-    payload = f"{\"username\":\"{username}\",\"password\":\"{password}\"}"
+    payload = f"{{\"username\":\"{username}\",\"password\":\"{password}\"}}"
     token_api = 'https://services.packtpub.com/auth-v1/users/tokens'
 
-    #r = requests.options(token_api)
     r = requests.post(token_api, data=payload)
     json = r.json()
 
@@ -97,8 +97,14 @@ def download_code(access, product, path):
 
 
 def main():
-    # Fill in username here
-    access = get_token("", "")
+    # Get username/passwords
+    with open('access.json', 'rt') as json_file:
+        data = json_file.read()
+        data = json.loads(data)
+        username = data['username']
+        password = data['password']
+
+    access = get_token(username, password)
 
     # Make download dir if not exist
     if not os.path.exists('downloads'):

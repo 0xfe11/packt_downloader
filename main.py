@@ -96,15 +96,18 @@ def download_code(access, product, path):
             file.write(data)
 
 
-def main():
+def get_access():
     # Get username/passwords
     with open('access.json', 'rt') as json_file:
         data = json_file.read()
         data = json.loads(data)
         username = data['username']
         password = data['password']
+    return get_token(username, password)
 
-    access = get_token(username, password)
+
+def download_all_books():
+    access = get_access()
 
     # Make download dir if not exist
     if not os.path.exists('downloads'):
@@ -118,20 +121,39 @@ def main():
             break
         
         for product in products:
-            name = product['productName']
-            path = f'downloads/{name}'
-
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-            download_epub(access, product, path)
-            download_mobi(access, product, path)
-            download_pdf(access, product, path)
-            download_code(access, product, path)
-
-            print(f'Downloading {name} done.')
+            download_book(product)
         start += 10
     print('All done.')
+
+
+def download_book(access, product):
+    name = product['productName']
+    path = f'downloads/{name}'
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    download_epub(access, product, path)
+    download_mobi(access, product, path)
+    download_pdf(access, product, path)
+    download_code(access, product, path)
+
+    print(f'Downloading {name} done.')
+
+
+def download_one_book(productName, productId):
+    access = get_access()
+
+    # Make download dir if not exist
+    if not os.path.exists('downloads'):
+        os.makedirs('downloads')
+    
+    product = {'productName': productName, 'productId': productId}
+    download_book(access, product)
+    
+def main():
+    #download_all_books()
+    download_one_book('Learn Linux Shell Scripting - Fundamentals of Bash 4.4', '9781788995597')
 
 
 if __name__ == '__main__':

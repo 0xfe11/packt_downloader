@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import requests
 
@@ -152,10 +153,14 @@ def download_one_book(productName, productId):
     download_book(access, product)
     
 def main():
-    #download_all_books()
-    download_one_book('Learn Linux Shell Scripting - Fundamentals of Bash 4.4', '9781788995597')
+    download_all_books()
+    # download_one_book('Learn Linux Shell Scripting - Fundamentals of Bash 4.4', '9781788995597')
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) == 3:
+        print(f"Downloading {sys.argv[1]}")
+        download_one_book(sys.argv[1], sys.argv[2])
+    else:
+        main()
 

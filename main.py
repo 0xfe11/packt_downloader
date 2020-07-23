@@ -152,15 +152,14 @@ def download_one_book(productName, productId):
     product = {'productName': productName, 'productId': productId}
     download_book(access, product)
     
-def main():
-    download_all_books()
-    # download_one_book('Learn Linux Shell Scripting - Fundamentals of Bash 4.4', '9781788995597')
-
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
+        # To download one book, use python main.py name_of_book id_of_book
         print(f"Downloading {sys.argv[1]}")
         download_one_book(sys.argv[1], sys.argv[2])
     else:
-        main()
+        # Otherwise download all of them
+        print("Downloading all the books from packtpub")
+        download_all_books()
 

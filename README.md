@@ -19,12 +19,12 @@ For the first time, it will generate an empty access.json if it is not created, 
 
 To download all the books,
 
-```command line
+```
   python main.py all
 ```
 
 To download only one book,
 
-```command line
+```
   python main.py "Mastering Windows PowerShell Scripting - Third Edition" 9781789536669
 ```

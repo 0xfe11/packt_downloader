@@ -4,6 +4,25 @@ import aiohttp
 import asyncio
 import requests
 
+
+def get_access():
+    if not os.path.isfile('access.json'):
+        with open('access.json', 'wt') as json_file:
+            json_file.write('{ "username":"", "password":"" }')
+
+    # Get username/passwords
+    with open('access.json', 'rt') as json_file:
+        data = json_file.read()
+        data = json.loads(data)
+        username = data['username']
+        password = data['password']
+
+        if len(username) == 0 or len(password) == 0:
+            print("[Error] Username or Password is empty in access.json file.")
+            return None
+    return get_token(username, password)
+
+
 def get_token(username, password):
     payload = f"{{\"username\":\"{username}\",\"password\":\"{password}\"}}"
     token_api = 'https://services.packtpub.com/auth-v1/users/tokens'
@@ -118,39 +137,31 @@ async def download_task(token, products):
         await asyncio.gather(*tasks)
 
 
-def main():
-    # Get username/passwords
-    with open('access.json', 'rt') as json_file:
-        data = json_file.read()
-        data = json.loads(data)
-        username = data['username']
-        password = data['password']
+def download_all_books():
+    access = get_access()
+    if access is not None:
+        # Make download dir if not exist
+        if not os.path.exists('downloads'):
+            os.makedirs('downloads')
 
-    print("Getting tokens ...")
-    token = get_token(username, password)
+        print("Getting products ...")
+        # Start from 0
+        start = 0
+        limit = 10
+        products = []
+        while True:
+            current_page = get_products(token, start, limit)
+            if len(current_page) == 0:
+                break
+            
+            for product in current_page:
+                products.append(product)
+            start += limit
 
-    # Make download dir if not exist
-    if not os.path.exists('downloads'):
-        os.makedirs('downloads')
-
-    print("Getting products ...")
-    # Start from 0
-    start = 0
-    limit = 10
-    products = []
-    while True:
-        current_page = get_products(token, start, limit)
-        if len(current_page) == 0:
-            break
-        
-        for product in current_page:
-            products.append(product)
-        start += limit
-
-    print("Getting books ...")
-    asyncio.run(download_task(token, products))
+        print("Getting books ...")
+        asyncio.run(download_task(token, products))
 
 
 if __name__ == '__main__':
-    main()
+    download_all_books()
 

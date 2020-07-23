@@ -3,6 +3,7 @@ import sys
 import json
 import requests
 
+
 def get_token(username, password):
     payload = f"{{\"username\":\"{username}\",\"password\":\"{password}\"}}"
     token_api = 'https://services.packtpub.com/auth-v1/users/tokens'
@@ -98,33 +99,42 @@ def download_code(access, product, path):
 
 
 def get_access():
+    if not os.path.isfile('access.json'):
+        with open('access.json', 'wt') as json_file:
+            json_file.write('{ "username":"", "password":"" }')
+
     # Get username/passwords
     with open('access.json', 'rt') as json_file:
         data = json_file.read()
         data = json.loads(data)
         username = data['username']
         password = data['password']
+
+        if len(username) == 0 or len(password) == 0:
+            print("[Error] Username or Password is empty in access.json file.")
+            return None
     return get_token(username, password)
 
 
 def download_all_books():
     access = get_access()
 
-    # Make download dir if not exist
-    if not os.path.exists('downloads'):
-        os.makedirs('downloads')
-    
-    # Start from 0
-    start = 0
-    while True:
-        products = get_products(access, start, 10)
-        if len(products) == 0:
-            break
+    if access is not None:
+        # Make download dir if not exist
+        if not os.path.exists('downloads'):
+            os.makedirs('downloads')
         
-        for product in products:
-            download_book(product)
-        start += 10
-    print('All done.')
+        # Start from 0
+        start = 0
+        while True:
+            products = get_products(access, start, 10)
+            if len(products) == 0:
+                break
+            
+            for product in products:
+                download_book(product)
+            start += 10
+        print('All done.')
 
 
 def download_book(access, product):
@@ -145,12 +155,13 @@ def download_book(access, product):
 def download_one_book(productName, productId):
     access = get_access()
 
-    # Make download dir if not exist
-    if not os.path.exists('downloads'):
-        os.makedirs('downloads')
-    
-    product = {'productName': productName, 'productId': productId}
-    download_book(access, product)
+    if access is not None:
+        # Make download dir if not exist
+        if not os.path.exists('downloads'):
+            os.makedirs('downloads')
+        
+        product = {'productName': productName, 'productId': productId}
+        download_book(access, product)
     
 
 if __name__ == '__main__':
@@ -158,8 +169,11 @@ if __name__ == '__main__':
         # To download one book, use python main.py name_of_book id_of_book
         print(f"Downloading {sys.argv[1]}")
         download_one_book(sys.argv[1], sys.argv[2])
-    else:
-        # Otherwise download all of them
+    elif len(sys.argv) == 2 and sys.argv[1] == 'all':
+        # Download all of them
         print("Downloading all the books from packtpub")
         download_all_books()
-
+    else:
+        print(f"Usage:")
+        print(f"python {sys.argv[0]} all                    -- Download all books")
+        print(f"python {sys.argv[0]} book_name book_id      -- Download one book")
